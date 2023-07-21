@@ -11,6 +11,12 @@ const btnDown = document.querySelector("#down");
 let canvasSize;
 let elementsSize;
 
+//Creamos variable de la posición del jugador el cual sera un objeto.
+const playerPosition = {
+  x: undefined,
+  y: undefined,
+};
+
 //Cargar el canvas luego de haberse cargado el HTML completo
 window.addEventListener("load", setcanvasSize);
 window.addEventListener("resize", setcanvasSize);
@@ -52,10 +58,22 @@ function startGame() {
       const emoji = emojis[colum];
       const posX = elementsSize * (columIndex + 1);
       const posY = elementsSize * (rowIndex + 1);
+
+      //Validamos la posición de los emojis o punto de inicio
+      if (colum == "O") {
+        playerPosition.x = posX;
+        playerPosition.y = posY;
+        console.log({ playerPosition });
+      }
       game.fillText(emoji, posX, posY);
-      console.log({ row, rowIndex, colum, columIndex });
     });
   });
+  movePlayer();
+}
+
+//Creamos la función para el movimiento del jugador.
+function movePlayer() {
+  game.fillText(emojis["PLAYER"], playerPosition.x, playerPosition.y);
 }
 
 //Creamos el evento para escuchar los movimientos con el teclado.
@@ -65,7 +83,7 @@ btnUp.addEventListener("click", moveUp);
 btnLeft.addEventListener("click", moveLeft);
 btnRight.addEventListener("click", moveRight);
 btnDown.addEventListener("click", moveDown);
-//Creamos las finciopnes para los diferentes movimientos.
+//Creamos las funciones para los diferentes movimientos.
 function moveByKeys(event) {
   if (event.key == "ArrowUp") moveUp();
   else if (event.key == "ArrowLeft") moveLeft();
@@ -74,6 +92,8 @@ function moveByKeys(event) {
 }
 function moveUp() {
   console.log("Me quiero mover hacia arriba");
+  playerPosition.y -= elementsSize;
+  movePlayer();
 }
 function moveLeft() {
   console.log("Me quiero mover hacia la izquierda");
