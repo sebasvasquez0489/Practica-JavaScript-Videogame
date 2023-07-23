@@ -8,6 +8,7 @@ const btnLeft = document.querySelector("#left");
 const btnRight = document.querySelector("#right");
 const btnDown = document.querySelector("#down");
 
+//Variables globales.
 let canvasSize;
 let elementsSize;
 
@@ -39,7 +40,7 @@ function setcanvasSize() {
 }
 
 function startGame() {
-  console.log({ canvasSize, elementsSize });
+  //console.log({ canvasSize, elementsSize });
 
   game.font = elementsSize + "px Verdana";
   game.textAlign = "end";
@@ -50,7 +51,10 @@ function startGame() {
   const mapRows = map.trim().split("\n");
   //Creamos un nuevo array con .map
   const mapRowsCols = mapRows.map((row) => row.trim().split(""));
-  console.log({ map, mapRows, mapRowsCols });
+  //console.log({ map, mapRows, mapRowsCols });
+
+  /// Limpíamos todo para renderizar nuevamente, se realiza para limpiar movimientos del jugador
+  game.clearRect(0, 0, canvasSize, canvasSize);
 
   //Recorremos las filas y columnas para asi asignar cada posición y Renderizar de una manera mas legible en el codigo.
   mapRowsCols.forEach((row, rowIndex) => {
@@ -61,9 +65,11 @@ function startGame() {
 
       //Validamos la posición de los emojis o punto de inicio
       if (colum == "O") {
-        playerPosition.x = posX;
-        playerPosition.y = posY;
-        console.log({ playerPosition });
+        if (!playerPosition.x && !playerPosition.y) {
+          playerPosition.x = posX;
+          playerPosition.y = posY;
+          //console.log({ playerPosition });
+        }
       }
       game.fillText(emoji, posX, posY);
     });
@@ -83,24 +89,53 @@ btnUp.addEventListener("click", moveUp);
 btnLeft.addEventListener("click", moveLeft);
 btnRight.addEventListener("click", moveRight);
 btnDown.addEventListener("click", moveDown);
-//Creamos las funciones para los diferentes movimientos.
+//Creamos y validamos la funcion para los diferentes movimientos.
 function moveByKeys(event) {
   if (event.key == "ArrowUp") moveUp();
   else if (event.key == "ArrowLeft") moveLeft();
   else if (event.key == "ArrowRight") moveRight();
   else if (event.key == "ArrowDown") moveDown();
 }
+
+////*** Creamos las funciones de los movimientos ***////
+
 function moveUp() {
   console.log("Me quiero mover hacia arriba");
-  playerPosition.y -= elementsSize;
-  movePlayer();
+
+  if (playerPosition.y - elementsSize < elementsSize) {
+    console.log("OUT");
+  } else {
+    playerPosition.y -= elementsSize;
+    startGame();
+  }
 }
 function moveLeft() {
   console.log("Me quiero mover hacia la izquierda");
+
+  if (playerPosition.x - elementsSize < elementsSize - 1) {
+    console.log("OUT");
+  } else {
+    playerPosition.x -= elementsSize;
+    startGame();
+  }
 }
 function moveRight() {
   console.log("Me quiero mover hacia la derecha");
+
+  if (playerPosition.x + elementsSize > canvasSize) {
+    console.log("OUT");
+  } else {
+    playerPosition.x += elementsSize;
+    startGame();
+  }
 }
 function moveDown() {
   console.log("Me quiero mover hacia abajo");
+
+  if (playerPosition.y + elementsSize > canvasSize) {
+    console.log("OUT");
+  } else {
+    playerPosition.y += elementsSize;
+    startGame();
+  }
 }
