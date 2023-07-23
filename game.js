@@ -7,12 +7,18 @@ const btnUp = document.querySelector("#up");
 const btnLeft = document.querySelector("#left");
 const btnRight = document.querySelector("#right");
 const btnDown = document.querySelector("#down");
+const spanLives = document.querySelector("#lives");
+const spanTimes = document.querySelector("#time");
 
 //Variables globales.
 let canvasSize;
 let elementsSize;
 let level = 0;
 let lives = 3;
+
+let timeStart;
+let timePlayer;
+let timeInterval;
 
 //Creamos variables de la posición del jugador y regalo las cuales sera un objeto.
 const playerPosition = {
@@ -59,12 +65,18 @@ function startGame() {
     gameWin();
     return;
   }
+  if (!timeStart) {
+    timeStart = Date.now();
+    timeInterval = setInterval(showTime, 100);
+  }
 
   //Creamos la variable de las filas del mapa y Limpiamos el string con el metodo ".trim()" y creamos un nuevo arreglo a partir del string con ".split()"
   const mapRows = map.trim().split("\n");
   //Creamos un nuevo array con .map
   const mapRowsCols = mapRows.map((row) => row.trim().split(""));
   console.log({ map, mapRows, mapRowsCols });
+
+  showLives();
 
   /// Limpíamos todo para renderizar nuevamente, se realiza para limpiar movimientos del jugador
   enemyPositions = [];
@@ -132,12 +144,12 @@ function levelWin() {
 
 function levelFail() {
   console.log("Chocaste con un enemigo");
-
   lives--;
-  console.log(lives);
+
   if (lives <= 0) {
     level = 0;
     lives = 3;
+    timeStart = undefined;
   }
   playerPosition.x = undefined;
   playerPosition.y = undefined;
@@ -146,14 +158,29 @@ function levelFail() {
 
 function gameWin() {
   console.log("Terminaste el juego!!!");
+  clearInterval(timeInterval);
 }
+
+function showLives() {
+  const heartsArray = Array(lives).fill(emojis["HEART"]);
+  //console.log(heartsArray);
+  spanLives.innerHTML = "";
+  heartsArray.forEach((heart) => spanLives.append(heart));
+}
+
+function showTime() {
+  spanTimes.innerHTML = Date.now() - timeStart;
+}
+
 //Creamos el evento para escuchar los movimientos con el teclado.
 window.addEventListener("keydown", moveByKeys);
+
 //Creamos los eventos para los movimientos que podamos realizar utilizando el "click".
 btnUp.addEventListener("click", moveUp);
 btnLeft.addEventListener("click", moveLeft);
 btnRight.addEventListener("click", moveRight);
 btnDown.addEventListener("click", moveDown);
+
 //Creamos y validamos la funcion para los diferentes movimientos.
 function moveByKeys(event) {
   if (event.key == "ArrowUp") moveUp();
