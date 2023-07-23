@@ -11,12 +11,19 @@ const btnDown = document.querySelector("#down");
 //Variables globales.
 let canvasSize;
 let elementsSize;
+let level = 0;
+let lives = 3;
 
-//Creamos variable de la posición del jugador el cual sera un objeto.
+//Creamos variables de la posición del jugador y regalo las cuales sera un objeto.
 const playerPosition = {
   x: undefined,
   y: undefined,
 };
+const giftPosition = {
+  x: undefined,
+  y: undefined,
+};
+let enemyPositions = [];
 
 //Cargar el canvas luego de haberse cargado el HTML completo
 window.addEventListener("load", setcanvasSize);
@@ -40,20 +47,27 @@ function setcanvasSize() {
 }
 
 function startGame() {
-  //console.log({ canvasSize, elementsSize });
+  console.log({ canvasSize, elementsSize });
 
   game.font = elementsSize + "px Verdana";
   game.textAlign = "end";
 
   ///*** Creamos las variables para acceder a los elemntos desde las posiciones ***///
-  const map = maps[0];
+
+  const map = maps[level];
+  if (!map) {
+    gameWin();
+    return;
+  }
+
   //Creamos la variable de las filas del mapa y Limpiamos el string con el metodo ".trim()" y creamos un nuevo arreglo a partir del string con ".split()"
   const mapRows = map.trim().split("\n");
   //Creamos un nuevo array con .map
   const mapRowsCols = mapRows.map((row) => row.trim().split(""));
-  //console.log({ map, mapRows, mapRowsCols });
+  console.log({ map, mapRows, mapRowsCols });
 
   /// Limpíamos todo para renderizar nuevamente, se realiza para limpiar movimientos del jugador
+  enemyPositions = [];
   game.clearRect(0, 0, canvasSize, canvasSize);
 
   //Recorremos las filas y columnas para asi asignar cada posición y Renderizar de una manera mas legible en el codigo.
@@ -68,8 +82,16 @@ function startGame() {
         if (!playerPosition.x && !playerPosition.y) {
           playerPosition.x = posX;
           playerPosition.y = posY;
-          //console.log({ playerPosition });
+          console.log({ playerPosition });
         }
+      } else if (colum == "I") {
+        giftPosition.x = posX;
+        giftPosition.y = posY;
+      } else if (colum == "X") {
+        enemyPositions.push({
+          x: posX,
+          y: posY,
+        });
       }
       game.fillText(emoji, posX, posY);
     });
@@ -77,11 +99,54 @@ function startGame() {
   movePlayer();
 }
 
-//Creamos la función para el movimiento del jugador.
+/// Creamos la función para el movimiento del jugador.toFixed" para limitar numero de decimales.
 function movePlayer() {
+  const giftCollisionX =
+    playerPosition.x.toFixed(3) == giftPosition.x.toFixed(3);
+  const giftCollisionY =
+    playerPosition.y.toFixed(3) == giftPosition.y.toFixed(3);
+  const giftCollision = giftCollisionX && giftCollisionY;
+
+  if (giftCollision) {
+    levelWin();
+  }
+  /// Variables para validar colision con enemigos. Utilizamos el ".toFixed" para limitar numero de decimales ///
+  const enemyCollision = enemyPositions.find((enemy) => {
+    const enemyCollisionX = enemy.x.toFixed(3) == playerPosition.x.toFixed(3);
+    const enemyCollisionY = enemy.y.toFixed(3) == playerPosition.y.toFixed(3);
+    return enemyCollisionX && enemyCollisionY;
+  });
+  if (enemyCollision) {
+    levelFail();
+  }
+
   game.fillText(emojis["PLAYER"], playerPosition.x, playerPosition.y);
 }
 
+/// Se crea funcion para pasar de nivel cuando llegemos al "regalito"
+function levelWin() {
+  console.log("Subiste de nivel");
+  level++;
+  startGame();
+}
+
+function levelFail() {
+  console.log("Chocaste con un enemigo");
+
+  lives--;
+  console.log(lives);
+  if (lives <= 0) {
+    level = 0;
+    lives = 3;
+  }
+  playerPosition.x = undefined;
+  playerPosition.y = undefined;
+  startGame();
+}
+
+function gameWin() {
+  console.log("Terminaste el juego!!!");
+}
 //Creamos el evento para escuchar los movimientos con el teclado.
 window.addEventListener("keydown", moveByKeys);
 //Creamos los eventos para los movimientos que podamos realizar utilizando el "click".
