@@ -9,6 +9,8 @@ const btnRight = document.querySelector("#right");
 const btnDown = document.querySelector("#down");
 const spanLives = document.querySelector("#lives");
 const spanTimes = document.querySelector("#time");
+const spanRecord = document.querySelector("#record");
+const pResult = document.querySelector("#result");
 
 //Variables globales.
 let canvasSize;
@@ -38,15 +40,19 @@ window.addEventListener("resize", setcanvasSize);
 function setcanvasSize() {
   //Realizamos validacion para que las medidas del canvas se ajusten segun los tamaños
   if (window.innerHeight > window.innerWidth) {
-    canvasSize = window.innerWidth * 0.8;
+    canvasSize = window.innerWidth * 0.7;
   } else {
-    canvasSize = window.innerHeight * 0.8;
+    canvasSize = window.innerHeight * 0.7;
   }
+
+  canvasSize = Number(canvasSize.toFixed(3));
 
   canvas.setAttribute("width", canvasSize);
   canvas.setAttribute("height", canvasSize);
 
   elementsSize = canvasSize / 10;
+  playerPosition.x = undefined;
+  playerPosition.y = undefined;
 
   //llamamos la funcion para renderizar el mapa.
   startGame();
@@ -68,6 +74,7 @@ function startGame() {
   if (!timeStart) {
     timeStart = Date.now();
     timeInterval = setInterval(showTime, 100);
+    showRecord();
   }
 
   //Creamos la variable de las filas del mapa y Limpiamos el string con el metodo ".trim()" y creamos un nuevo arreglo a partir del string con ".split()"
@@ -159,6 +166,22 @@ function levelFail() {
 function gameWin() {
   console.log("Terminaste el juego!!!");
   clearInterval(timeInterval);
+
+  const recordTime = localStorage.getItem("record_time");
+  const playerTime = Date.now() - timeStart;
+
+  if (recordTime) {
+    if (recordTime >= playerTime) {
+      localStorage.setItem("record_time", playerTime);
+      pResult.innerHTML = "SUPERASTE EL RECORD !!!";
+    } else {
+      pResult.innerHTML = "NO :( superaste el record";
+    }
+  } else {
+    localStorage.setItem("record_time", playerTime);
+    pResult.innerHTML = "Muy bien, ahora Supera el Record";
+  }
+  console.log({ recordTime, playerTime });
 }
 
 function showLives() {
@@ -170,6 +193,10 @@ function showLives() {
 
 function showTime() {
   spanTimes.innerHTML = Date.now() - timeStart;
+}
+
+function showRecord() {
+  spanRecord.innerHTML = localStorage.getItem("record_time");
 }
 
 //Creamos el evento para escuchar los movimientos con el teclado.
